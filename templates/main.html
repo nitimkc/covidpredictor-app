@@ -36,15 +36,15 @@ form {
     </fieldset>
 </form>
 
-<br>
+<br> 
 <div class="prediction_prob" align="center">
     {% if prediction_prob %}
         {% for variable, value in original_input.items() %}
             <b>{{ variable }}</b> : {{ value }}
         {% endfor %}
         <br>
-        <br> Predicted probabilty of covid for given patient:
-           <p style="font-size:50px">{{ prediction_prob }}</p>
+        <br> Predicted probabilty of covid for given patient, probability percentile:
+           <p style="font-size:25px">{{ prediction_prob }}, {{ prediction_prob_percentile }}</p>
     {% endif %}
 </div>
 

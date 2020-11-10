@@ -1,13 +1,17 @@
 from flask import Flask, render_template, request
 import pickle
 import numpy as np
+from scipy import stats
 
 # load the model
 with open(f"model/best_model.pkl", 'rb') as f:
     model = pickle.load(f) 
+with open(f"model/best_model_prob.pkl", 'rb') as f:
+    prob = pickle.load(f) 
 
 # instantiate Flask
 app = Flask(__name__, template_folder='templates')
+# app = Flask('covid_predictor', template_folder='templates')
 
 # use Python decorators to decorate a function to map URL to a function
 # "/" URL is now mapped to "show_predict_covid_form" function
@@ -54,15 +58,20 @@ def results():
             X = X.reshape(1,-1)
 
         # pass X to predict y
-        y = model.predict_proba( X )[:,1]*100
-        y = np.append( np.round(y, 2), '' ) 
+        y = model.predict_proba( X )[:,1]
+        y_percentile = np.round( stats.percentileofscore(prob[:, 1], y),2 )
+
+        y = np.append( np.round(y*100, 2), '' ) 
         predicted_covid_prob = '% '.join(map(str, y))
+        prob_percentile = str(y_percentile)
+        
         
         # pass input variables and "predicted_prob" to the "render_template" function
         # display the predicted value on the webpage by rendering the "resultsform.html" file
         return render_template('main.html', 
                                 original_input=input_vars,
-                                prediction_prob=predicted_covid_prob)
+                                prediction_prob=predicted_covid_prob,
+                                prediction_prob_percentile=prob_percentile)
 
 # app.run() will start running the app on the host “localhost” on the port number 9999
 # "debug": - during development the Flask server can reload the code without restarting the app
