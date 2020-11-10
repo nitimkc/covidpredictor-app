@@ -7,7 +7,7 @@ with open(f"model/best_model.pkl", 'rb') as f:
     model = pickle.load(f) 
 
 # instantiate Flask
-app = Flask('covid_predictor', template_folder='templates')
+app = Flask(__name__, template_folder='templates')
 
 # use Python decorators to decorate a function to map URL to a function
 # "/" URL is now mapped to "show_predict_covid_form" function
@@ -68,4 +68,5 @@ def results():
 # "debug": - during development the Flask server can reload the code without restarting the app
 #          - also outputs useful debugging information
 # visiting http://localhost:9999/ will render the "predictorform.html" page.
-app.run("localhost", "9999", debug=True)
+if __name__ == "main":
+    app.run("localhost", "9999", debug=True)
