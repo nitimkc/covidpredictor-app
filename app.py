@@ -106,4 +106,4 @@ def results():
 #          - also outputs useful debugging information
 # visiting http://localhost:9999/ will render the "predictorform.html" page.
 # if __name__ == "main":
-#     app.run("localhost", "9999", debug=True)
+app.run("localhost", "9999", debug=True)
