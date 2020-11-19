@@ -17,12 +17,11 @@ app = Flask(__name__, template_folder='templates')
 # app = Flask('covid_predictor', template_folder='templates')
 
 # use Python decorators to decorate a function to map URL to a function
-# "/" URL is now mapped to "show_predict_covid_form" function
 @app.route('/') 
 
-# if user visits "/", then Flask will render "predictorform.html" on the web browser
+# if user visits "/", then Flask will render "main.html" on the web browser
 #                          Flask will look for the html file in templates folder
-# "render_tempplate" function renders the template and expects it to be stored 
+# "render_template" function renders the template and expects it to be stored 
 # in the Templates folder on the same level as the "app.py" file
 def show_predict_covid_form():
     return render_template('main.html')
@@ -33,7 +32,6 @@ def show_predict_covid_form():
 def results():
     form = request.form
     if request.method == 'GET':
-        # return(render_template('predictorform.html'))
         show_predict_covid_form()
 
     if request.method == 'POST':
@@ -65,7 +63,7 @@ def results():
         record_dummy = dict(zip(vars, X))
 
         if sum(X[:5])==0:
-            predicted_covid_prob = False #"Not Applicable, at least one symptom must be present"
+            predicted_covid_prob = False
             prob_percentile = False
             model_name = False
             model_score = False

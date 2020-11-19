@@ -120,30 +120,31 @@ form {
 </form>
 
 <div class="prediction_prob" align="left">
-    <div class="displayinput">
-    {% for variable, value in original_input.items() %}
-        <b>{{ variable }}</b> : {{ value }} | 
-    {% endfor %}
-    </div>
-    <div class="displayresult">
-    {% if prediction_prob %}
-        <p style="font-size:20px"> <strong>Predicted probabilty of COVID: </strong>{{ prediction_prob }}</p>
-        <p style="font-size:20px"> <strong>Probability Percentile: </strong>{{ prediction_prob_percentile }}</p>
-        <p style="font-size:20px"> <strong>Model used: </strong>{{ model_name }}</p>
-        {% if model_score %}
-            <p style="font-size:20px"> <strong>Model accuracy report: </strong></p>
-                <div class=displayscore>
-                    {% for variable, value in model_score.items() %}
-                        <b>{{ variable }}</b> : {{ value }}<br>
-                    {% endfor %} 
-                </div>
-        {% endif %}
-        <p style="font-size:16px"> <strong>Note:</strong> Results are only applicable for patients exhibiting at least one symptom.</p>
-    {% else %}
-        Results not applicable, at least one symptom must be present. <br>
-    {% endif %}
+    {% if original_input %}
+        <div class="displayinput">
+        {% for variable, value in original_input.items() %}
+            <b>{{ variable }}</b> : {{ value }} | 
+        {% endfor %}
         </div>
-
+        <div class="displayresult">
+        {% if prediction_prob %}
+            <p style="font-size:20px"> <strong>Predicted probabilty of COVID: </strong>{{ prediction_prob }}</p>
+            <p style="font-size:20px"> <strong>Probability Percentile: </strong>{{ prediction_prob_percentile }}</p>
+            <p style="font-size:20px"> <strong>Model used: </strong>{{ model_name }}</p>
+            {% if model_score %}
+                <p style="font-size:20px"> <strong>Model accuracy report: </strong></p>
+                    <div class=displayscore>
+                        {% for variable, value in model_score.items() %}
+                            <b>{{ variable }}</b> : {{ value }}<br>
+                        {% endfor %} 
+                    </div>
+            {% endif %}
+            <p style="font-size:16px"> <strong>Note:</strong> Results are only applicable for patients exhibiting at least one symptom.</p>
+        {% else %}
+            Results not applicable, at least one symptom must be present. <br>
+        {% endif %}
+            </div>
+    {% endif %}
 </div>
 
 </html>
