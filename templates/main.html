@@ -2,7 +2,7 @@
 <html>
 <style>
 form {
-    margin: auto;
+    margin-left: 5%;
     width: 35%;
 }
 
@@ -11,6 +11,35 @@ form {
     width: 35%;
     border: 1px solid #ccc;
 }
+
+.inputtable select{
+    float: right;
+    width: 130px;
+}
+
+.inputtable {
+    width: 340px;
+}
+
+.prediction_prob {
+    margin: 2% 5%;
+}
+
+.displayinput {
+    font-size:18px;
+    padding: 10px;
+}
+
+.displayresult {
+    border: 5px solid green;
+    padding: 5px;
+}
+
+.displayscore {
+    font-size:18px;
+    margin-left: 50px; 
+}
+
 </style>
 
 <head>
@@ -18,34 +47,103 @@ form {
 </head>
 
 <form action="{{ url_for('results') }}" method="POST">
-    <fieldset>
+    <fieldset class="inputtable">
         <legend>Provide patient information:</legend>
         Cough: 
-        <input name="cough" type="number" required> 
+        <select name="cough" required>
+            <option></option>
+            <option>Yes</option>
+            <option>No</option>
+        </select> <br>
+        <br> 
+        Fever: 
+        <select name="fever" required>
+            <option></option>
+            <option>Yes</option>
+            <option>No</option>
+        </select> <br>
+        <br> 
+        Sore throat:
+        <select name="sorethroat" required>
+            <option></option>
+            <option>Yes</option>
+            <option>No</option>
+        </select> <br>
+        <br> 
+        Headache:
+        <select name="headache" required>
+            <option></option>
+            <option>Yes</option>
+            <option>No</option>
+        </select> <br>
+        <br> 
+        Shortness of breath:
+        <select name="shortnessofbreath" required>
+            <option></option>
+            <option>Yes</option>
+            <option>No</option>
+        </select> <br>
+        <br> 
+        Contact with known carrier:
+        <select name="contact" required>
+            <option></option>
+            <option>Yes</option>
+            <option>No</option>
+        </select> <br>
+        <br> 
+        Recent travel abroad:
+        <select name="abroad" required>
+            <option></option>
+            <option>Yes</option>
+            <option>No</option>
+        </select> <br>
+        <br> 
+        Age:
+        <select name="sixtiesplus" required>
+            <option></option>
+            <option>Below 60</option>
+            <option>Above 60</option>
+            <option>Age Unknown</option>
+        </select> <br>
+        <br> 
+        Gender:
+        <select name="gender" required>
+            <option></option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Gender Unknown</option>
+        </select> <br>
         <br>
-        <br> Fever: <input name="fever" type="number" required>  <br>
-        <br> Sore throat: <input name="sorethroat" type="number" required>  <br>
-        <br> Shortness of breath: <input name="shortnessofbreath" type="number" required>  <br>
-        <br> Headache: <input name="headache" type="number" required>  <br>
-        <br> Sixities plus: <input name="sixtiesplus" type="number" required>  <br>
-        <br> Gender: <input name="gender" type="number" required>  <br>
-        <br> Contact with known carrier: <input name="contact" type="number" required>  <br>
-        <br> Recent travel abroad: <input name="abroad" type="number" required><br>
-        <br>
-        <input type="submit">
-    </fieldset>
+        <input type="submit" value="Submit">
+        </fieldset>
+
 </form>
 
-<br> 
-<div class="prediction_prob" align="center">
+<div class="prediction_prob" align="left">
+    <div class="displayinput">
+    {% for variable, value in original_input.items() %}
+        <b>{{ variable }}</b> : {{ value }} | 
+    {% endfor %}
+    </div>
+    <div class="displayresult">
     {% if prediction_prob %}
-        {% for variable, value in original_input.items() %}
-            <b>{{ variable }}</b> : {{ value }}
-        {% endfor %}
-        <br>
-        <br> Predicted probabilty of covid for given patient, probability percentile:
-           <p style="font-size:25px">{{ prediction_prob }}, {{ prediction_prob_percentile }}</p>
+        <p style="font-size:20px"> <strong>Predicted probabilty of COVID: </strong>{{ prediction_prob }}</p>
+        <p style="font-size:20px"> <strong>Probability Percentile: </strong>{{ prediction_prob_percentile }}</p>
+        <p style="font-size:20px"> <strong>Model used: </strong>{{ model_name }}</p>
+        {% if model_score %}
+            <p style="font-size:20px"> <strong>Model accuracy report: </strong></p>
+                <div class=displayscore>
+                    {% for variable, value in model_score.items() %}
+                        <b>{{ variable }}</b> : {{ value }}<br>
+                    {% endfor %} 
+                </div>
+        {% endif %}
+        <p style="font-size:16px"> <strong>Note:</strong> Results are only applicable for patients exhibiting at least one symptom.</p>
+    {% else %}
+        Results not applicable, at least one symptom must be present.
     {% endif %}
+        </div>
+
 </div>
 
 </html>
