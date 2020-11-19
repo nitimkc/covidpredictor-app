@@ -9,4 +9,4 @@ Werkzeug==1.0.1
 wincertstore==0.2
 scikit-learn==0.23.2
 scipy==1.5.3
-re  
+
