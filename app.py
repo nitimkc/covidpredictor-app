@@ -105,5 +105,5 @@ def results():
 # "debug": - during development the Flask server can reload the code without restarting the app
 #          - also outputs useful debugging information
 # visiting http://localhost:9999/ will render the "predictorform.html" page.
-if __name__ == "main":
-    app.run("localhost", "9999", debug=True)
+# if __name__ == "main":
+#     app.run("localhost", "9999", debug=True)
