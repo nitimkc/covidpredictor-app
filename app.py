@@ -48,7 +48,7 @@ def results():
         abroad = request.form['abroad']
         
         # convert input elements into list and dictionary
-        display_vars = ['Cough', 'Fever', 'Sore throat', 'Headache', 'Shortness of breath', 
+        display_vars = ['Cough', 'Fever', 'Sore throat', 'Shortness of breath', 'Headache',
                         'Contact with known carrier', 'Recent travel abroad', 'Age ', 'Gender']
         vars = ['cough', 'fever', 'sorethroat', 'shortnessofbreath', 'headache', 'contact', 'abroad', 'sixtiesplus', 'gender']
         map_vals = {'No':0, 'Yes':1, 'Below 60':[0,0], 'Above 60':[1,0],'Age Unknown':[0,1], 'Male':[0,0], 'Female':[1,0],'Gender Unknown':[0,1]}
