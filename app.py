@@ -48,19 +48,24 @@ def results():
         abroad = request.form['abroad']
         
         # convert input elements into list and dictionary
+        # input_vars = ['No','Yes','Yes','Yes','Yes','Above 60','Male','Yes','No',]
+        input_vars = [cough, fever, sorethroat, shortnessofbreath, headache, sixtiesplus, gender, contact, abroad,]
+        reg_vars = ['cough', 'fever', 'sorethroat', 'shortnessofbreath', 'headache']
+        dummy_vars = ['sixtiesplus', 'gender', 'contact', 'abroad',]
+        record = dict(zip(reg_vars+dummy_vars, input_vars))
+                            
         display_vars = ['Cough', 'Fever', 'Sore throat', 'Shortness of breath', 'Headache',
-                        'Contact with known carrier', 'Recent travel abroad', 'Age ', 'Gender']
-        vars = ['cough', 'fever', 'sorethroat', 'shortnessofbreath', 'headache', 'contact', 'abroad', 'sixtiesplus', 'gender']
-        map_vals = {'No':0, 'Yes':1, 'Below 60':[0,0], 'Above 60':[1,0],'Age Unknown':[0,1], 'Male':[0,0], 'Female':[1,0],'Gender Unknown':[0,1]}
-
-        # input_vars = ['No','Yes','Yes','Yes','Yes','Yes','No','Above 60','Male']
-        input_vars = [cough, fever, sorethroat, shortnessofbreath, headache, contact, abroad, sixtiesplus, gender,]
-        
-        record = dict(zip(vars, input_vars))
+                        'Age ', 'Gender', 'Contact with known carrier', 'Recent travel abroad',]
         display_record = dict(zip(display_vars, input_vars))
         
-        X = [map_vals.get(i,i)  for i in input_vars]
-        record_dummy = dict(zip(vars, X))
+        map_reg_vals = {'Yes':1, 'No':0}
+        map_dummy_vals = {'Yes':[1,0], 'No':[0,0],'Unknown':[0,1],
+                            'Below 60':[0,0], 'Above 60':[1,0], 
+                            'Male':[0,0], 'Female':[1,0],}
+
+        reg_X = [map_reg_vals.get(j,j)  for i,j in record.items() if i in reg_vars]
+        dummy_X = [map_dummy_vals.get(j,j)  for i,j in record.items() if i in dummy_vars]
+        X = reg_X + dummy_X
 
         if sum(X[:5])==0:
             predicted_covid_prob = False
@@ -68,16 +73,18 @@ def results():
             model_name = False
             model_score = False
         else:
-            X_dummy = []
-            for (k,v) in record_dummy.items():
-                if type(v)==list:
-                    X_dummy.extend(v)
+            X_all = []
+            for i in X:
+                if type(i)==list:
+                    X_all.extend(i)
                 else:
-                    X_dummy.append(v)
+                    X_all.append(i)
+
             # prepare X for sklearn model
-            X_int = np.array(X_dummy)
+            X_int = np.array(X_all)
             if len(X_int.shape) == 1:
                 X_int = X_int.reshape(1,-1)
+            
             # pass X to predict y
             y = model.predict_proba( X_int )[:,1]
             y_percentile = np.round( stats.percentileofscore(prob[:, 1], y),1 )
