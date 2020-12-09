@@ -109,14 +109,6 @@ form {
             <option>No</option>
             <option>Unknown</option>
         </select> <br>
-        <br> 
-        Recent travel abroad:
-        <select name="abroad" required>
-            <option></option>
-            <option>Yes</option>
-            <option>No</option>
-            <option>Unknown</option>
-        </select> <br>
         <br>
         <input type="submit" value="Submit">
         </fieldset>
@@ -132,18 +124,50 @@ form {
         </div>
         <div class="displayresult">
         {% if prediction_prob %}
-            <p style="font-size:20px"> <strong>Predicted probabilty of COVID: </strong>{{ prediction_prob }}</p>
-            <p style="font-size:20px"> <strong>Probability Percentile: </strong>{{ prediction_prob_percentile }}</p>
-            <p style="font-size:20px"> <strong>Model used: </strong>{{ model_name }}</p>
+            <p style="font-size:20px"> <strong>Model score (probability of positive PCR) : </strong>{{ prediction_prob }}</p>
+            <p style="font-size:20px"> <strong>Model percentile : </strong>{{ prediction_prob_percentile }}</p>
+            <p style="font-size:20px"> <strong>Policy advice : </strong>{{ policy_advice }}</p>
+            <p style="font-size:20px"> <strong>Model used : </strong>{{ model_name }}</p>
             {% if model_score %}
-                <p style="font-size:20px"> <strong>Model accuracy report: </strong></p>
+                <p style="font-size:20px"> <strong>Model accuracy report : </strong></p>
                     <div class=displayscore>
                         {% for variable, value in model_score.items() %}
                             <b>{{ variable }}</b> : {{ value }}<br>
                         {% endfor %} 
                     </div>
             {% endif %}
-            <p style="font-size:16px"> <strong>Note:</strong> Results are only applicable for patients exhibiting at least one symptom.</p>
+            
+            <p style="font-size:20px"> <strong>Inputs:</strong> </p>
+             <table style="width:32%; font-size:16px;">
+                <tr>
+                    <td><strong>Test sensitivity (True pos rate):</strong> </td><td>85%</td>
+                </tr>
+                <tr>
+                    <td><strong>Test specificity (True neg rate):</strong> </td><td>99%</td>
+                </tr>
+                <tr>
+                    <td><strong>Estimated Testing Capacity (this period):</strong> </td><td>10,000</td>
+                </tr>
+                <tr>
+                    <td><strong>Estimated no. of patients available for testing*:</strong> <br>
+                                (with group satisfying filter condition below)</td><td>30,000</td>
+                </tr>                
+                </table> 
+    
+            <p style="font-size:20px"> <strong>Data Analysis and Summary:</strong> </p>
+            <table style="width:25%; font-size:16px;">
+                <tr>
+                    <td>Filter applied:</td><td>Symtomatic = Yes </td>
+                </tr>
+                <tr>
+                    <td>Observed positive rate:</td><td>{{obs_posrate}}</td>
+                </tr>
+                <tr>
+                    <td>Estimated positive rate:</td><td>{{est_posrate}}</td>
+                </tr>               
+                </table> 
+            
+            <p style="font-size:14px"> <strong>Note :</strong> Results are only applicable for patients exhibiting at least one symptom.</p>
         {% else %}
             Results not applicable, at least one symptom must be present. <br>
         {% endif %}

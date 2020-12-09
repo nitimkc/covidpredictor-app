@@ -1,0 +1,4 @@
+{
+'features': ['cough', 'fever', 'sore_throat', 'shortness_of_breath', 'head_ache', 'Sixties', 'Gender', 'contact'],
+'target': 'testresult',
+}

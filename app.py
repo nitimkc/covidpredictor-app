@@ -11,10 +11,13 @@ with open(f"model/best_model_prob.pkl", 'rb') as f:
     prob = pickle.load(f) 
 with open(f"model/best_model_score.pkl", 'rb') as f:
     score = pickle.load(f) 
+# with open(f"model/column_means.pkl", 'rb') as f:
+#     col_means = pickle.load(f) 
+col_means = {'cough':None, 'fever':None, 'sore_throat':None, 'shortness_of_breath':None, 'head_ache':None, 'Sixties': 0.123189725, 'Gender': 0.49188364, 'contact': 0.63471705}
 
 # instantiate Flask
-app = Flask(__name__, template_folder='templates')
-# app = Flask('covid_predictor', template_folder='templates')
+# app = Flask(__name__, template_folder='templates')
+app = Flask('covid_predictor', template_folder='templates')
 
 # use Python decorators to decorate a function to map URL to a function
 @app.route('/') 
@@ -45,57 +48,61 @@ def results():
         sixtiesplus = request.form['sixtiesplus']
         gender = request.form['gender']
         contact = request.form['contact']
-        abroad = request.form['abroad']
         
         # convert input elements into list and dictionary
-        # input_vars = ['No','Yes','Yes','Yes','Yes','Above 60','Male','Yes','No',]
-        input_vars = [cough, fever, sorethroat, shortnessofbreath, headache, sixtiesplus, gender, contact, abroad,]
-        reg_vars = ['cough', 'fever', 'sorethroat', 'shortnessofbreath', 'headache']
-        dummy_vars = ['sixtiesplus', 'gender', 'contact', 'abroad',]
-        record = dict(zip(reg_vars+dummy_vars, input_vars))
-                            
+        # input_vals = ['No','Yes','Yes','Yes','Yes','Above 60','Unknown','Yes',]
+        input_vals = [cough, fever, sorethroat, shortnessofbreath, headache, sixtiesplus, gender, contact,]
+        input_vars = [k for k in col_means]
+        record = dict(zip(input_vars, input_vals))      
+
+        # for pretty display
         display_vars = ['Cough', 'Fever', 'Sore throat', 'Shortness of breath', 'Headache',
-                        'Age ', 'Gender', 'Contact with known carrier', 'Recent travel abroad',]
-        display_record = dict(zip(display_vars, input_vars))
+                        'Age ', 'Gender', 'Contact with known carrier',]
+        display_record = dict(zip(display_vars, input_vals))
         
-        map_reg_vals = {'Yes':1, 'No':0}
-        map_dummy_vals = {'Yes':[1,0], 'No':[0,0],'Unknown':[0,1],
-                            'Below 60':[0,0], 'Above 60':[1,0], 
-                            'Male':[0,0], 'Female':[1,0],}
+        # process record to fit model requirement             
+        maps = {'Yes':1.0, 'No':0.0, 'Male':1.0, 'Female':0.0, 'Above 60':1.0, 'Below 60':0.0}
+        dummy_vars = [k for k,v in col_means.items() if v!=None]
 
-        reg_X = [map_reg_vals.get(j,j)  for i,j in record.items() if i in reg_vars]
-        dummy_X = [map_dummy_vals.get(j,j)  for i,j in record.items() if i in dummy_vars]
-        X = reg_X + dummy_X
-
+        processed_record = dict(zip(record.keys(), [maps.get(j,j)  for i,j in record.items() if i in record.keys()])) 
+        X = {}
+        for i in processed_record: 
+            if i in dummy_vars:
+                if processed_record[i] in [0,1]:               # if contains values other than 0 and 1
+                    X[i] = processed_record[i]
+                    X[i+'_1'] = 0.0                # create new dummy column, 1=missing in original
+                else:
+                    X[i] = col_means[i]            # fill value other than 0 and 1 with mean
+                    X[i+'_1'] = 1.0   
+            else:
+                X[i] = processed_record[i]
+        X = list(X.values())
+        
         if sum(X[:5])==0:
             predicted_covid_prob = False
             prob_percentile = False
             model_name = False
             model_score = False
+            obs_posrate = False
+            est_posrate = False
+            policy_advice = False
         else:
-            X_all = []
-            for i in X:
-                if type(i)==list:
-                    X_all.extend(i)
-                else:
-                    X_all.append(i)
-
-            # prepare X for sklearn model
-            X_int = np.array(X_all)
-            if len(X_int.shape) == 1:
-                X_int = X_int.reshape(1,-1)
+            X = np.array(X).reshape(1,-1)
             
             # pass X to predict y
-            y = model.predict_proba( X_int )[:,1]
+            y = model.predict_proba( X )[:,1]
             y_percentile = np.round( stats.percentileofscore(prob[:, 1], y),1 )
             
             predicted_covid_prob = '% '.join(map(str, np.append(np.round(y*100, 1), '') ))
             prob_percentile = str(y_percentile)
             model_name = re.sub(r"(\w)([A-Z])", r"\1 \2", score['name'])
-            model_score = score #'% '.join(map(str, np.append(np.round(score['auc']*100, 2), '') ))
             model_score = dict((k, score[k]) for k in ('sensitivity', 'specificity', 'accuracy', 'auc'))
             for k,v in model_score.items():
-                model_score[k] = '% '.join(map(str, np.append(np.round(v*100, 1), '') ))
+                model_score[k] = str(np.round(v*100,1))+'%'
+            obs_posrate = str(np.round(score['positiverate']*100,1))+'%'
+            est_posrate = (score['positiverate']-1+.99)/(.85-1+.99)
+            est_posrate = str(np.round(est_posrate*100,1))+'%'
+            policy_advice = np.where( y_percentile>(1-10000/30000), "Test", "Do Not Test")
 
         # pass input variables and "predicted_prob" to the "render_template" function
         # display the predicted value on the webpage by rendering the "resultsform.html" file
@@ -104,11 +111,14 @@ def results():
                                 prediction_prob=predicted_covid_prob,
                                 prediction_prob_percentile=prob_percentile,
                                 model_name=model_name,
-                                model_score=model_score)
+                                model_score=model_score,
+                                obs_posrate=obs_posrate,
+                                est_posrate=est_posrate,
+                                policy_advice=policy_advice)
 
 # app.run() will start running the app on the host “localhost” on the port number 9999
 # "debug": - during development the Flask server can reload the code without restarting the app
 #          - also outputs useful debugging information
 # visiting http://localhost:9999/ will render the "predictorform.html" page.
-if __name__ == "main":
-    app.run("localhost", "9999", debug=True)
+# if __name__ == "main":
+app.run("localhost", "9999", debug=True)

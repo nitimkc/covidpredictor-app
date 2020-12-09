@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<style>
+form {
+    margin-left: 5%;
+    width: 35%;
+}
+
+.result {
+    margin: auto;
+    width: 35%;
+    border: 1px solid #ccc;
+}
+
+.inputtable select{
+    float: right;
+    width: 130px;
+}
+
+.inputtable {
+    width: 340px;
+}
+
+.prediction_prob {
+    margin: 2% 5%;
+}
+
+.displayinput {
+    font-size:18px;
+    padding: 10px;
+}
+
+.displayresult {
+    border: 5px solid green;
+    padding: 5px;
+}
+
+.displayscore {
+    font-size:18px;
+    margin-left: 50px; 
+}
+
+</style>
+
+<head>
+    <title>Covid Predictor application</title>
+</head>
+
+<h1>Covid Probabilty Predictor App</h1>
+features = ['a', 'b', 'c']
+<form action="{{ url_for('results') }}" method="POST">
+    <fieldset class="inputtable">
+        <legend>Provide patient information:</legend>
+        {% for i in features %}
+            {{i}}: 
+            <select name="{{i.lower()}}" required>
+                <option></option>
+                <option>Yes</option>
+                <option>No</option>
+            </select> <br>
+            {% comment %} {{i}}: <br>
+            <input type="text" value="{{ i }}"><br> {% endcomment %}
+        {% endfor %} <br>
+        <br>
+        <input type="submit" value="Submit">
+    </fieldset>
+
+</form>
+
+<div class="prediction_prob" align="left">
+    {% if original_input %}
+        <div class="displayinput">
+        {% for variable, value in original_input.items() %}
+            <b>{{ variable }}</b> : {{ value }} | 
+        {% endfor %}
+        </div>
+        <div class="displayresult">
+        {% if prediction_prob %}
+            <p style="font-size:20px"> <strong>Predicted probabilty of COVID: </strong>{{ prediction_prob }}</p>
+            <p style="font-size:20px"> <strong>Probability Percentile: </strong>{{ prediction_prob_percentile }}</p>
+            <p style="font-size:20px"> <strong>Model used: </strong>{{ model_name }}</p>
+            {% if model_score %}
+                <p style="font-size:20px"> <strong>Model accuracy report: </strong></p>
+                    <div class=displayscore>
+                        {% for variable, value in model_score.items() %}
+                            <b>{{ variable }}</b> : {{ value }}<br>
+                        {% endfor %} 
+                    </div>
+            {% endif %}
+            <p style="font-size:16px"> <strong>Note:</strong> Results are only applicable for patients exhibiting at least one symptom.</p>
+        {% else %}
+            Results not applicable, at least one symptom must be present. <br>
+        {% endif %}
+            </div>
+    {% endif %}
+</div>
+
+</html>
