@@ -16,8 +16,8 @@ with open(f"model/best_model_score.pkl", 'rb') as f:
 col_means = {'cough':None, 'fever':None, 'sore_throat':None, 'shortness_of_breath':None, 'head_ache':None, 'Sixties': 0.123189725, 'Gender': 0.49188364, 'contact': 0.63471705}
 
 # instantiate Flask
-# app = Flask(__name__, template_folder='templates')
-app = Flask('covid_predictor', template_folder='templates')
+app = Flask(__name__, template_folder='templates')
+# app = Flask('covid_predictor', template_folder='templates')
 
 # use Python decorators to decorate a function to map URL to a function
 @app.route('/') 
@@ -120,5 +120,5 @@ def results():
 # "debug": - during development the Flask server can reload the code without restarting the app
 #          - also outputs useful debugging information
 # visiting http://localhost:9999/ will render the "predictorform.html" page.
-# if __name__ == "main":
-app.run("localhost", "9999", debug=True)
+if __name__ == "main":
+    app.run("localhost", "9999", debug=True)
