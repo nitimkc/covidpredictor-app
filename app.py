@@ -43,7 +43,7 @@ def results():
         # test_capacity , n_patient = 10000, 30000
         rates  = [ float(i) if float(i) < 1 else float(i)/100 for i in rates]
         tpr , tnr = rates[0], rates [1] 
-        n_patient  = test_capacity if n_patient > test_capacity else n_patient
+        n_patient  = test_capacity if test_capacity > n_patient  else n_patient
         print(n_patient, type(n_patient))
         print(test_capacity, type(test_capacity))
 
