@@ -43,6 +43,9 @@ def results():
         # test_capacity , n_patient = 10000, 30000
         rates  = [ float(i) if float(i) < 1 else float(i)/100 for i in rates]
         tpr , tnr = rates[0], rates [1] 
+        n_patient  = test_capacity if n_patient > test_capacity else n_patient
+        print(n_patient, type(n_patient))
+        print(test_capacity, type(test_capacity))
 
         # input_vals = ['No','Yes','Yes','Yes','Yes','Above 60','Unknown','Yes',]
         # input_vals = ['Yes','No','No','No','No','Below 60','Female','Unknown',]
@@ -70,7 +73,6 @@ def results():
         
         # add_dummy columns
         for i,j in zip(dummy_vars,dummy_vars_missing):
-            print(i,j)
             if processed_record[i] not in [0,1]:
                 processed_record.update({j:1.0})
             else:
@@ -99,6 +101,7 @@ def results():
             model_score = dict((k, score[k]) for k in ('sensitivity', 'specificity', 'accuracy', 'AUC'))
             for k,v in model_score.items():
                 model_score[k] = str(np.round(v*100,1))+'%'
+            
             obs_posrate = str(np.round(score['positiverate']*100,1))+'%'
             est_posrate = (score['positiverate']-1+tnr)/(tpr-1+tnr)
             est_posrate = str(np.round(est_posrate*100,1))+'%'
