@@ -36,7 +36,14 @@ def results():
 
     if request.method == 'POST':
 
-        # gather input from web form using request.Form, which is a dictionary object
+        # gather input from web form using request.Form
+        rates = [request.form['tpr'], request.form['tnr']]
+        test_capacity, n_patient = int(request.form['test_capacity']), int(request.form['n_patient'])
+        # rates = ['85.0', '90.0']
+        # test_capacity , n_patient = 10000, 30000
+        rates  = [ float(i) if float(i) < 1 else float(i)/100 for i in rates]
+        tpr , tnr = rates[0], rates [1] 
+
         # input_vals = ['No','Yes','Yes','Yes','Yes','Above 60','Unknown','Yes',]
         # input_vals = ['Yes','No','No','No','No','Below 60','Female','Unknown',]
         input_vals = [request.form['cough'], request.form['fever'], request.form['sorethroat'], request.form['shortnessofbreath'], 
@@ -48,25 +55,29 @@ def results():
         display_vars = ['Cough', 'Fever', 'Sore throat', 'Shortness of breath', 'Headache',
                         'Age ', 'Gender', 'Contact with known carrier',]
         display_record = dict(zip(display_vars, input_vals))
+        display_test_info = dict(zip(['Test sensitivity', 'Test specificity', 'Estimated testing capacity', 'Estimated no. of patients'],
+                                     [tpr, tnr, test_capacity, n_patient]))
         
         # process record to fit model requirement             
         maps = {'No':0.0, 'Yes':1.0, 'Male':0.0, 'Female':1.0, 'Below 60':0.0, 'Above 60':1.0 }
         dummy_vars = [k for k,v in col_means.items() if v!=None]
+        dummy_vars_missing = [i+'_1' for i in dummy_vars]
 
         processed_record = dict(zip(record.keys(), [maps.get(j,j)  for i,j in record.items() if i in record.keys()])) 
-        X = {}
-        for i in processed_record: 
-            if i in dummy_vars:
-                if processed_record[i] in [0,1]:   # if  value is 0 or 1            
-                    X[i] = processed_record[i]       # keep value as is
-                    X[i+'_1'] = 0.0                  # create new dummy column with value 0
-                else:                              # if  values other than 0 and 1
-                    X[i] = col_means[i]              # replace missing value with mean
-                    X[i+'_1'] = 1.0                  # create new dummy column with value 1
-            else:
-                X[i] = processed_record[i]         # all other columns have values as is
-        X = list(X.values())
+        for i in processed_record:
+            if processed_record[i] =='Unknown':
+                processed_record[i] = col_means[i] 
         
+        # add_dummy columns
+        for i,j in zip(dummy_vars,dummy_vars_missing):
+            print(i,j)
+            if processed_record[i] not in [0,1]:
+                processed_record.update({j:1.0})
+            else:
+                processed_record.update({j:0.0})
+
+        X = list(processed_record.values())
+
         if sum(X[:5])==0:
             predicted_covid_prob = False
             prob_percentile = False
@@ -89,14 +100,15 @@ def results():
             for k,v in model_score.items():
                 model_score[k] = str(np.round(v*100,1))+'%'
             obs_posrate = str(np.round(score['positiverate']*100,1))+'%'
-            est_posrate = (score['positiverate']-1+.99)/(.85-1+.99)
+            est_posrate = (score['positiverate']-1+tnr)/(tpr-1+tnr)
             est_posrate = str(np.round(est_posrate*100,1))+'%'
-            policy_advice = np.where( y_percentile/100>1-(10000/30000), "Test", "Do Not Test")
+            policy_advice = np.where( y_percentile/100>1-(test_capacity/n_patient), "Test", "Do Not Test")
 
         # pass input variables and "predicted_prob" to the "render_template" function
         # display the predicted value on the webpage by rendering the "resultsform.html" file
         return render_template('main.html', 
-                                original_input=display_record,
+                                original_patient_input=display_record,
+                                original_test_input=display_test_info,
                                 prediction_prob=predicted_covid_prob,
                                 prediction_prob_percentile=prob_percentile,
                                 model_name=model_name,
