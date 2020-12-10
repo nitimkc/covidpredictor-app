@@ -15,8 +15,8 @@ with open(f"model/column_means.pkl", 'rb') as f:
     col_means = pickle.load(f) 
 
 # instantiate Flask
-app = Flask(__name__, template_folder='templates')
-# app = Flask('covid_predictor', template_folder='templates')
+# app = Flask(__name__, template_folder='templates')
+app = Flask('covid_predictor', template_folder='templates')
 
 # use Python decorators to decorate a function to map URL to a function
 @app.route('/') 
@@ -90,7 +90,7 @@ def results():
             obs_posrate = str(np.round(score['positiverate']*100,1))+'%'
             est_posrate = (score['positiverate']-1+.99)/(.85-1+.99)
             est_posrate = str(np.round(est_posrate*100,1))+'%'
-            policy_advice = np.where( y_percentile>1-(10000/30000), "Test", "Do Not Test")
+            policy_advice = np.where( y_percentile/100>1-(10000/30000), "Test", "Do Not Test")
 
         # pass input variables and "predicted_prob" to the "render_template" function
         # display the predicted value on the webpage by rendering the "resultsform.html" file
@@ -108,5 +108,5 @@ def results():
 # "debug": - during development the Flask server can reload the code without restarting the app
 #          - also outputs useful debugging information
 # visiting http://localhost:9999/ will render the "predictorform.html" page.
-if __name__ == "main":
-    app.run("localhost", "9999", debug=True)
+# if __name__ == "main":
+app.run("localhost", "9999", debug=True)
