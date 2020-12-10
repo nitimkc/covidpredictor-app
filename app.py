@@ -21,14 +21,12 @@ app = Flask(__name__, template_folder='templates')
 # use Python decorators to decorate a function to map URL to a function
 @app.route('/') 
 
-# if user visits "/", then Flask will render "main.html" on the web browser
-#                          Flask will look for the html file in templates folder
 # "render_template" function renders the template and expects it to be stored 
 # in the Templates folder on the same level as the "app.py" file
 def show_predict_covid_form():
     return render_template('main.html')
 
-# "/results" is now mapped to "results" function defined below (line 18 to 30)    
+# "/results" is now mapped to "results" function defined below
 @app.route('/results', methods=['GET', 'POST'])
 
 def results():
@@ -39,18 +37,9 @@ def results():
     if request.method == 'POST':
 
         # gather input from web form using request.Form, which is a dictionary object
-        cough = request.form['cough']
-        fever = request.form['fever']
-        sorethroat = request.form['sorethroat']
-        shortnessofbreath = request.form['shortnessofbreath']
-        headache = request.form['headache']
-        sixtiesplus = request.form['sixtiesplus']
-        gender = request.form['gender']
-        contact = request.form['contact']
-        
-        # convert input elements into list and dictionary
         # input_vals = ['No','Yes','Yes','Yes','Yes','Above 60','Unknown','Yes',]
-        input_vals = [cough, fever, sorethroat, shortnessofbreath, headache, sixtiesplus, gender, contact,]
+        input_vals = [request.form['cough'], request.form['fever'], request.form['sorethroat'], request.form['shortnessofbreath'], 
+                        request.form['headache'], request.form['sixtiesplus'], request.form['gender'], request.form['contact'],]
         input_vars = [k for k in col_means]
         record = dict(zip(input_vars, input_vals))      
 
@@ -67,14 +56,14 @@ def results():
         X = {}
         for i in processed_record: 
             if i in dummy_vars:
-                if processed_record[i] in [0,1]:               # if contains values other than 0 and 1
-                    X[i] = processed_record[i]
-                    X[i+'_1'] = 0.0                # create new dummy column, 1=missing in original
-                else:
-                    X[i] = col_means[i]            # fill value other than 0 and 1 with mean
-                    X[i+'_1'] = 1.0   
+                if processed_record[i] in [0,1]:   # if  value is 0 or 1            
+                    X[i] = processed_record[i]       # keep value as is
+                    X[i+'_1'] = 0.0                  # create new dummy column with value 0
+                else:                              # if  values other than 0 and 1
+                    X[i] = col_means[i]              # replace missing value with mean
+                    X[i+'_1'] = 1.0                  # create new dummy column with value 1
             else:
-                X[i] = processed_record[i]
+                X[i] = processed_record[i]         # all other columns have values as is
         X = list(X.values())
         
         if sum(X[:5])==0:
