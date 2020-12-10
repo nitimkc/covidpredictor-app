@@ -11,9 +11,8 @@ with open(f"model/best_model_prob.pkl", 'rb') as f:
     prob = pickle.load(f) 
 with open(f"model/best_model_score.pkl", 'rb') as f:
     score = pickle.load(f) 
-# with open(f"model/column_means.pkl", 'rb') as f:
-#     col_means = pickle.load(f) 
-col_means = {'cough':None, 'fever':None, 'sore_throat':None, 'shortness_of_breath':None, 'head_ache':None, 'Sixties': 0.123189725, 'Gender': 0.49188364, 'contact': 0.63471705}
+with open(f"model/column_means.pkl", 'rb') as f:
+    col_means = pickle.load(f) 
 
 # instantiate Flask
 app = Flask(__name__, template_folder='templates')
