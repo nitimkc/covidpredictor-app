@@ -15,8 +15,8 @@ with open(f"model/column_means.pkl", 'rb') as f:
     col_means = pickle.load(f) 
 
 # instantiate Flask
-# app = Flask(__name__, template_folder='templates')
-app = Flask('covid_predictor', template_folder='templates')
+app = Flask(__name__, template_folder='templates')
+# app = Flask('covid_predictor', template_folder='templates')
 
 # use Python decorators to decorate a function to map URL to a function
 @app.route('/') 
@@ -108,5 +108,5 @@ def results():
 # "debug": - during development the Flask server can reload the code without restarting the app
 #          - also outputs useful debugging information
 # visiting http://localhost:9999/ will render the "predictorform.html" page.
-# if __name__ == "main":
-app.run("localhost", "9999", debug=True)
+if __name__ == "main":
+    app.run("localhost", "9999", debug=True)
