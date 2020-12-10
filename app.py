@@ -56,7 +56,7 @@ def results():
                         'Age ', 'Gender', 'Contact with known carrier',]
         display_record = dict(zip(display_vars, input_vals))
         display_test_info = dict(zip(['Test sensitivity', 'Test specificity', 'Estimated testing capacity', 'Estimated no. of patients'],
-                                     [tpr, tnr, test_capacity, n_patient]))
+                                     [str(np.round(tpr*100,1))+'%', str(np.round(tnr*100,1))+'%', test_capacity, n_patient]))
         
         # process record to fit model requirement             
         maps = {'No':0.0, 'Yes':1.0, 'Male':0.0, 'Female':1.0, 'Below 60':0.0, 'Above 60':1.0 }
