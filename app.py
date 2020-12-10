@@ -38,6 +38,7 @@ def results():
 
         # gather input from web form using request.Form, which is a dictionary object
         # input_vals = ['No','Yes','Yes','Yes','Yes','Above 60','Unknown','Yes',]
+        # input_vals = ['Yes','No','No','No','No','Below 60','Female','Unknown',]
         input_vals = [request.form['cough'], request.form['fever'], request.form['sorethroat'], request.form['shortnessofbreath'], 
                         request.form['headache'], request.form['sixtiesplus'], request.form['gender'], request.form['contact'],]
         input_vars = [k for k in col_means]
@@ -49,7 +50,7 @@ def results():
         display_record = dict(zip(display_vars, input_vals))
         
         # process record to fit model requirement             
-        maps = {'Yes':1.0, 'No':0.0, 'Male':1.0, 'Female':0.0, 'Above 60':1.0, 'Below 60':0.0}
+        maps = {'No':0.0, 'Yes':1.0, 'Male':0.0, 'Female':1.0, 'Below 60':0.0, 'Above 60':1.0 }
         dummy_vars = [k for k,v in col_means.items() if v!=None]
 
         processed_record = dict(zip(record.keys(), [maps.get(j,j)  for i,j in record.items() if i in record.keys()])) 
