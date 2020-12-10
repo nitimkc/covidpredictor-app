@@ -84,13 +84,13 @@ def results():
             predicted_covid_prob = '% '.join(map(str, np.append(np.round(y*100, 1), '') ))
             prob_percentile = str(y_percentile)
             model_name = re.sub(r"(\w)([A-Z])", r"\1 \2", score['name'])
-            model_score = dict((k, score[k]) for k in ('sensitivity', 'specificity', 'accuracy', 'auc'))
+            model_score = dict((k, score[k]) for k in ('sensitivity', 'specificity', 'accuracy', 'AUC'))
             for k,v in model_score.items():
                 model_score[k] = str(np.round(v*100,1))+'%'
             obs_posrate = str(np.round(score['positiverate']*100,1))+'%'
             est_posrate = (score['positiverate']-1+.99)/(.85-1+.99)
             est_posrate = str(np.round(est_posrate*100,1))+'%'
-            policy_advice = np.where( y_percentile>(1-10000/30000), "Test", "Do Not Test")
+            policy_advice = np.where( y_percentile>1-(10000/30000), "Test", "Do Not Test")
 
         # pass input variables and "predicted_prob" to the "render_template" function
         # display the predicted value on the webpage by rendering the "resultsform.html" file
