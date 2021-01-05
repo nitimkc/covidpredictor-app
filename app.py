@@ -50,8 +50,8 @@ def results():
 
         input_vals = [request.form['cough'], request.form['fever'], request.form['sorethroat'], request.form['shortnessofbreath'], 
                         request.form['headache'], request.form['sixtiesplus'], request.form['gender'], request.form['apt7'],]
-        # input_vals = ['No','Yes','Yes','Yes','Yes','Above 60','Unknown','Yes',]
-        # input_vals = ['Yes','No','No','No','No','Below 60','Female','Unknown',]
+        # input_vals = ['No','Yes','Yes','Yes','Yes','Above 60','Unknown',.25,]
+        # input_vals = ['Yes','No','No','No','No','Below 60','Female',.25,]
         input_vars = [k for k in col_means]
         record = dict(zip(input_vars, input_vals))      
 
