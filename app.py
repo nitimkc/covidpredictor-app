@@ -41,16 +41,17 @@ def results():
         test_capacity, n_patient = int(request.form['test_capacity']), int(request.form['n_patient'])
         # rates = ['85.0', '90.0']
         # test_capacity , n_patient = 10000, 30000
+        
         rates  = [ float(i) if float(i) < 1 else float(i)/100 for i in rates]
         tpr , tnr = rates[0], rates [1] 
         n_patient  = test_capacity if test_capacity > n_patient  else n_patient
         print(n_patient, type(n_patient))
         print(test_capacity, type(test_capacity))
 
+        input_vals = [request.form['cough'], request.form['fever'], request.form['sorethroat'], request.form['shortnessofbreath'], 
+                        request.form['headache'], request.form['sixtiesplus'], request.form['gender'], request.form['apt7'],]
         # input_vals = ['No','Yes','Yes','Yes','Yes','Above 60','Unknown','Yes',]
         # input_vals = ['Yes','No','No','No','No','Below 60','Female','Unknown',]
-        input_vals = [request.form['cough'], request.form['fever'], request.form['sorethroat'], request.form['shortnessofbreath'], 
-                        request.form['headache'], request.form['sixtiesplus'], request.form['gender'], request.form['contact'],]
         input_vars = [k for k in col_means]
         record = dict(zip(input_vars, input_vals))      
 
