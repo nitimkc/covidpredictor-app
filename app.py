@@ -36,21 +36,22 @@ def results():
         show_predict_covid_form()
 
     if request.method == 'POST':
-
+        
         # gather input from web form using request.Form
         rates = [request.form['tpr'], request.form['tnr']]
         test_capacity, n_patient = int(request.form['test_capacity']), int(request.form['n_patient'])
+        input_vals = [request.form['cough'], request.form['fever'], request.form['sorethroat'], request.form['shortnessofbreath'], 
+                request.form['headache'], request.form['sixtiesplus'], request.form['gender'], request.form['apt7'],]
+        
         # rates = ['85.0', '90.0']
         # test_capacity , n_patient = 10000, 30000
-        
+        # input_vals = ['No','Yes','Yes','Yes','Yes','Above 60','Unknown',.25,]
+        # input_vals = ['Yes','No','No','No','No','Below 60','Female',.25,]
+
         rates  = [ float(i) if float(i) < 1 else float(i)/100 for i in rates]
         tpr , tnr = rates[0], rates [1] 
         n_patient  = test_capacity if test_capacity > n_patient  else n_patient
 
-        input_vals = [request.form['cough'], request.form['fever'], request.form['sorethroat'], request.form['shortnessofbreath'], 
-                        request.form['headache'], request.form['sixtiesplus'], request.form['gender'], request.form['apt7'],]
-        # input_vals = ['No','Yes','Yes','Yes','Yes','Above 60','Unknown',.25,]
-        # input_vals = ['Yes','No','No','No','No','Below 60','Female',.25,]
         input_vars = [k for k in col_means]
         record = dict(zip(input_vars, input_vals))      
 
@@ -99,8 +100,8 @@ def results():
             # pass X to predict y
             y = model.predict_proba( X )[:,1]
             y_prob = model.predict_proba(X_test)[:,1]
-            
             y_percentile = np.round( stats.percentileofscore(y_prob, y),1 )
+            
             predicted_covid_prob = '% '.join(map(str, np.append(np.round(y*100, 1), '') ))
             prob_percentile = str(y_percentile)
             model_name = re.sub(r"(\w)([A-Z])", r"\1 \2", score['name'])
@@ -111,9 +112,6 @@ def results():
             obs_posrate = str(np.round(score['positiverate']*100,1))+'%'
             est_posrate = (score['positiverate']-1+tnr)/(tpr-1+tnr)
             est_posrate = str(np.round(est_posrate*100,1))+'%'
-            print(type(y_percentile))
-            print(type(test_capacity))
-            print(type(n_patient))
             policy_advice = np.where( y_percentile/100>1-(test_capacity/n_patient), "Test", "Do Not Test")
 
         # pass input variables and "predicted_prob" to the "render_template" function
