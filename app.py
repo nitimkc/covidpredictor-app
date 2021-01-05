@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from scipy import stats
 
-# load the model
+# load the reqd info
 with open(f"model/best_model.pkl", 'rb') as f:
     model = pickle.load(f) 
 with open(f"model/X_test.pkl", 'rb') as f:
@@ -74,10 +74,11 @@ def results():
         
         # add_dummy columns
         for i,j in zip(dummy_vars,dummy_vars_missing):
+            print(i,j)
             if processed_record[i] not in [0,1]:
-                processed_record.update({j:1.0})
+                processed_record.update({j:1.0}) # replace dummy col with value 1
             else:
-                processed_record.update({j:0.0})
+                processed_record.update({j:0.0}) # replace dummy col with value 0
 
         X = list(processed_record.values())
         X_test = pd.DataFrame(test_data, columns=[k for k,v in processed_record.items()])
