@@ -41,8 +41,8 @@ def results():
         rates = [request.form['tpr'], request.form['tnr']]
         test_capacity, n_patient = int(request.form['test_capacity']), int(request.form['n_patient'])
         input_vals = [request.form['cough'], request.form['fever'], request.form['sorethroat'], request.form['shortnessofbreath'], 
-                request.form['headache'], request.form['sixtiesplus'], request.form['gender'], request.form['apt7'],]
-        
+                request.form['headache'], request.form['sixtiesplus'], request.form['gender'], float(request.form['apt7'])/100,]
+
         # rates = ['85.0', '90.0']
         # test_capacity , n_patient = 10000, 30000
         # input_vals = ['No','Yes','Yes','Yes','Yes','Above 60','Unknown',.25,]
@@ -82,7 +82,7 @@ def results():
 
         X = list(processed_record.values())
         X_test = pd.DataFrame(test_data, columns=[k for k,v in processed_record.items()])
-        
+
         if sum(X[:5])==0:
             predicted_covid_prob = False
             prob_percentile = False
@@ -93,9 +93,10 @@ def results():
             policy_advice = False
         else:
             X = np.array(X).reshape(1,-1)
-
-            cond1 = X_test['Ave_Pos_Past7d']>=(float(input_vals[-1])-.3)
-            cond2 = X_test['Ave_Pos_Past7d']>=(float(input_vals[-1])+.3)
+            print(processed_record)
+            print(X)
+            cond1 = X_test['Ave_Pos_Past7d']>=(float(input_vals[-1])-0.3)
+            cond2 = X_test['Ave_Pos_Past7d']<=(float(input_vals[-1])+0.3)
             X_test = X_test[(cond1)&(cond2)]
 
             # pass X to predict y
@@ -126,7 +127,8 @@ def results():
                                 model_score=model_score,
                                 obs_posrate=obs_posrate,
                                 est_posrate=est_posrate,
-                                policy_advice=policy_advice)
+                                policy_advice=policy_advice,
+                                processed_record=processed_record)
 
 # app.run() will start running the app on the host “localhost” on the port number 9999
 # "debug": - during development the Flask server can reload the code without restarting the app
