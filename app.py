@@ -57,7 +57,7 @@ def results():
 
         # for pretty display
         display_vars = ['Cough', 'Fever', 'Sore throat', 'Shortness of breath', 'Headache',
-                        'Age ', 'Gender', 'Contact with known carrier',]
+                        'Age ', 'Gender', 'Average positive test % in the last 7 days',]
         display_record = dict(zip(display_vars, input_vals))
         display_test_info = dict(zip(['Test sensitivity', 'Test specificity', 'Estimated testing capacity', 'Estimated no. of patients'],
                                      [str(np.round(tpr*100,1))+'%', str(np.round(tnr*100,1))+'%', test_capacity, n_patient]))
@@ -95,8 +95,8 @@ def results():
             X = np.array(X).reshape(1,-1)
             print(processed_record)
             print(X)
-            cond1 = X_test['Ave_Pos_Past7d']>=(float(input_vals[-1])-0.3)
-            cond2 = X_test['Ave_Pos_Past7d']<=(float(input_vals[-1])+0.3)
+            cond1 = X_test['Ave_Pos_Past7d']>=(float(input_vals[-1])-1)
+            cond2 = X_test['Ave_Pos_Past7d']<=(float(input_vals[-1])+1)
             X_test = X_test[(cond1)&(cond2)]
 
             # pass X to predict y
