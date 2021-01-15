@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import pickle
 import re
+import csv
 import pandas as pd
 import numpy as np
 from scipy import stats
@@ -8,10 +9,12 @@ from scipy import stats
 # load the reqd info
 with open(f"model/best_model.pkl", 'rb') as f:
     model = pickle.load(f) 
-with open(f"model/X_test.pkl", 'rb') as f:
-    test_data = pickle.load(f) 
 with open(f"model/best_model_score.pkl", 'rb') as f:
     score = pickle.load(f) 
+with open(f"model/best_model_prob.pkl", 'rb') as f:
+    prob = pickle.load(f) 
+with open(f"model/X_test.csv", 'rt') as f:
+    test_data = [float(line.rstrip('\n')) for line in f]
 with open(f"model/column_means.pkl", 'rb') as f:
     col_means = pickle.load(f) 
 
@@ -81,7 +84,7 @@ def results():
                 processed_record.update({j:0.0}) # replace dummy col with value 0
 
         X = list(processed_record.values())
-        X_test = pd.DataFrame(test_data, columns=[k for k,v in processed_record.items()])
+        X_test = pd.DataFrame( {'apt7':test_data, 'prob':prob[:,1]} )
 
         if sum(X[:5])==0:
             predicted_covid_prob = False
@@ -94,15 +97,13 @@ def results():
         else:
             X = np.array(X).reshape(1,-1)
             print(processed_record)
-            print(X)
-            cond1 = X_test['Ave_Pos_Past7d']>=(float(input_vals[-1])-1)
-            cond2 = X_test['Ave_Pos_Past7d']<=(float(input_vals[-1])+1)
+            cond1 = X_test['apt7']>=(float(input_vals[-1])-1)
+            cond2 = X_test['apt7']<=(float(input_vals[-1])+1)
             X_test = X_test[(cond1)&(cond2)]
 
             # pass X to predict y
             y = model.predict_proba( X )[:,1]
-            y_prob = model.predict_proba(X_test)[:,1]
-            y_percentile = np.round( stats.percentileofscore(y_prob, y),1 )
+            y_percentile = np.round( stats.percentileofscore(X_test['prob'], y),1 )
             
             predicted_covid_prob = '% '.join(map(str, np.append(np.round(y*100, 1), '') ))
             prob_percentile = str(y_percentile)
