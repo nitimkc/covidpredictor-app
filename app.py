@@ -19,8 +19,8 @@ with open(f"model/column_means.pkl", 'rb') as f:
     col_means = pickle.load(f) 
 
 # instantiate Flask
-app = Flask(__name__, template_folder='templates')
-# app = Flask('covid_predictor', template_folder='templates')
+# app = Flask(__name__, template_folder='templates')
+app = Flask('covid_predictor', template_folder='templates')
 
 # use Python decorators to decorate a function to map URL to a function
 @app.route('/') 
@@ -43,13 +43,14 @@ def results():
         # gather input from web form using request.Form
         rates = [request.form['tpr'], request.form['tnr']]
         test_capacity, n_patient = int(request.form['test_capacity']), int(request.form['n_patient'])
-        input_vals = [request.form['cough'], request.form['fever'], request.form['sorethroat'], request.form['shortnessofbreath'], 
-                request.form['headache'], request.form['sixtiesplus'], request.form['gender'], float(request.form['apt7'])/100,]
+        input_vals = [request.form['cough'], request.form['fever'], request.form['sorethroat'], 
+                        request.form['shortnessofbreath'], request.form['headache'], request.form['sixtiesplus'],
+                        request.form['gender'], float(request.form['apt7'])/100, request.form['reasonfortest']]
 
         # rates = ['85.0', '90.0']
         # test_capacity , n_patient = 10000, 30000
-        # input_vals = ['No','Yes','Yes','Yes','Yes','Above 60','Unknown',.25,]
-        # input_vals = ['Yes','No','No','No','No','Below 60','Female',.25,]
+        # input_vals = ['No','Yes','Yes','Yes','Yes','Above 60','Unknown',.25,'Other']
+        # input_vals = ['Yes','No','No','No','No','Below 60','Female',.25,'Other]
 
         rates  = [ float(i) if float(i) < 1 else float(i)/100 for i in rates]
         tpr , tnr = rates[0], rates [1] 
@@ -66,18 +67,18 @@ def results():
                                      [str(np.round(tpr*100,1))+'%', str(np.round(tnr*100,1))+'%', test_capacity, n_patient]))
         
         # process record to fit model requirement             
-        maps = {'No':0.0, 'Yes':1.0, 'Male':0.0, 'Female':1.0, 'Below 60':0.0, 'Above 60':1.0 }
+        maps = {'No':0.0, 'Yes':1.0, 'Male':0.0, 'Female':1.0, 'Below 60':0.0, 'Above 60':1.0, 'Contact':1.0, 'Travel':0.0 }
         dummy_vars = [k for k,v in col_means.items() if v!=None]
         dummy_vars_missing = [i+'_1' for i in dummy_vars]
 
         processed_record = dict(zip(record.keys(), [maps.get(j,j)  for i,j in record.items() if i in record.keys()])) 
         for i in processed_record:
-            if processed_record[i] =='Unknown':
+            if (processed_record[i] =='Unknown')|(processed_record[i] =='Other'):
                 processed_record[i] = col_means[i] 
         
         # add_dummy columns
         for i,j in zip(dummy_vars,dummy_vars_missing):
-            print(i,j)
+            # print(i,j)
             if processed_record[i] not in [0,1]:
                 processed_record.update({j:1.0}) # replace dummy col with value 1
             else:
@@ -97,8 +98,8 @@ def results():
         else:
             X = np.array(X).reshape(1,-1)
             print(processed_record)
-            cond1 = X_test['apt7']>=(float(input_vals[-1])-1)
-            cond2 = X_test['apt7']<=(float(input_vals[-1])+1)
+            cond1 = X_test['apt7']>=(float(record['Ave_Pos_Past7d'])-1)
+            cond2 = X_test['apt7']<=(float(record['Ave_Pos_Past7d'])+1)
             X_test = X_test[(cond1)&(cond2)]
 
             # pass X to predict y
@@ -135,5 +136,5 @@ def results():
 # "debug": - during development the Flask server can reload the code without restarting the app
 #          - also outputs useful debugging information
 # visiting http://localhost:9999/ will render the "predictorform.html" page.
-if __name__ == "main":
-    app.run("localhost", "9999", debug=True)
+# if __name__ == "main":
+app.run("localhost", "9999", debug=True)
