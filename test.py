@@ -14,3 +14,4 @@ for i,j in zip(keys,vals):
 ar=['key1', 'key2', 'key3']
 for i in ar:
     i = 'p'+i
+<p style="font-size:20px"> <strong>Processed X: </strong>{{ processed_record }}</p>
