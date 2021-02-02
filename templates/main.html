@@ -55,9 +55,10 @@ input[type="number"] {
 </head>
 
 <h1>Covid Probabilty Predictor App</h1>
-<h4>Current Version: based on data from Israel Ministry of Health (IMOH) from March 12, 2020 to Sept 3, 2020 </h4>
+<h4>Current Version: Based on data from Israel Ministry of Health (IMOH) from March 12, 2020 to Sept 3, 2020
+<p> Note : Results are only applicable for patients exhibiting at least one symptom.</p> </h4>
 
-<form action="{{ url_for('results') }}" method="POST">
+<form action="{{ url_for('results') }}" method="POST">  
     <fieldset class="inputtable">
         <strong>Provide test information:</strong><br>
             <label  for="tpr">Test sensitivity (True pos rate):</label>
@@ -74,6 +75,7 @@ input[type="number"] {
             <input type="number" id="n_patient" name="n_patient" min="1" value="30000"><br>
             <br>
     </fieldset><br>
+
     <fieldset class="inputtable">
         <strong>Provide patient information:</strong><br>
         Cough: 
@@ -146,27 +148,15 @@ input[type="number"] {
 <div class="prediction_prob" align="left">
     {% if original_patient_input %}
         <div class="displayinput">
-        {% for variable, value in original_patient_input.items() %}
+        | {% for variable, value in original_patient_input.items() %}
             <b>{{ variable }}</b> : {{ value }} | 
         {% endfor %} <br><br>
-        {% for variable, value in original_test_input.items() %}
+        | {% for variable, value in original_test_input.items() %}
             <b>{{ variable }}</b> : {{ value }} | 
         {% endfor %}
         </div>
         <div class="displayresult">
         {% if prediction_prob %}
-            <p style="font-size:20px"> <strong>Data Analysis and Summary:</strong> </p>
-                <table style="width:40%; font-size:18px;">
-                    <tr>
-                        <td><strong>Filter applied:</td><td>Symptomatic = Yes </strong></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Observed positive rate:</td><td>{{obs_posrate}}</strong></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Corrected positive rate:</td><td>{{est_posrate}}</strong></td>
-                    </tr>               
-                </table> 
             <p style="font-size:20px"> <strong>Model score (probability of positive PCR) : </strong>{{ prediction_prob }}</p>
             <p style="font-size:20px"> <strong>Model percentile : </strong>{{ prediction_prob_percentile }}</p>
             <p style="font-size:20px"> <strong>Policy advice : </strong>{{ policy_advice }}</p>
@@ -179,6 +169,19 @@ input[type="number"] {
                         {% endfor %} 
                     </div>
             {% endif %}
+            
+            <p style="font-size:20px"> <strong>Data Analysis and Summary:</strong> </p>
+            <table style="width:40%; font-size:16px;">
+                <tr>
+                    <td>Filter applied:</td><td>Symptomatic = Yes </td>
+                </tr>
+                <tr>
+                    <td>Observed positive rate:</td><td>{{obs_posrate}}</td>
+                </tr>
+                <tr>
+                    <td>Corrected positive rate:</td><td>{{est_posrate}}</td>
+                </tr>               
+                </table> 
             
             <p style="font-size:14px"> <strong>Note :</strong> Results are only applicable for patients exhibiting at least one symptom.</p>
         {% else %}

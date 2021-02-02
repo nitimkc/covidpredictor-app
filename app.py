@@ -27,6 +27,7 @@ app = Flask(__name__, template_folder='templates')
 
 # "render_template" function renders the template and expects it to be stored 
 # in the Templates folder on the same level as the "app.py" file
+
 def show_predict_covid_form():
     return render_template('main.html')
 
@@ -35,6 +36,7 @@ def show_predict_covid_form():
 
 def results():
     form = request.form
+    # # undo this section if using show predict covid form function with some variables to return 
     if request.method == 'GET':
         show_predict_covid_form()
 
@@ -61,7 +63,7 @@ def results():
 
         # for pretty display
         display_vars = ['Cough', 'Fever', 'Sore throat', 'Shortness of breath', 'Headache',
-                        'Age ', 'Gender', 'Average positive test % in the last 7 days',]
+                        'Age ', 'Gender', 'Average positive test % in the last 7 days', 'Reason for the test']
         display_record = dict(zip(display_vars, input_vals))
         display_test_info = dict(zip(['Test sensitivity', 'Test specificity', 'Estimated testing capacity', 'Estimated no. of patients'],
                                      [str(np.round(tpr*100,1))+'%', str(np.round(tnr*100,1))+'%', test_capacity, n_patient]))
@@ -97,7 +99,7 @@ def results():
             policy_advice = False
         else:
             X = np.array(X).reshape(1,-1)
-            print(processed_record)
+            # print(processed_record)
             cond1 = X_test['apt7']>=(float(record['Ave_Pos_Past7d'])-1)
             cond2 = X_test['apt7']<=(float(record['Ave_Pos_Past7d'])+1)
             X_test = X_test[(cond1)&(cond2)]
@@ -119,7 +121,7 @@ def results():
             policy_advice = np.where( y_percentile/100>1-(test_capacity/n_patient), "Test", "Do Not Test")
 
         # pass input variables and "predicted_prob" to the "render_template" function
-        # display the predicted value on the webpage by rendering the "resultsform.html" file
+        # display the predicted value on the webpage by rendering the "/results.html" file
         return render_template('main.html', 
                                 original_patient_input=display_record,
                                 original_test_input=display_test_info,
